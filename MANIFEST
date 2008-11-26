@@ -15,8 +15,11 @@ META.yml
 README
 t/anon.t
 t/basic.t
+t/lib/Affe.pm
 t/lib/Foo.pm
+t/lib/Tiger.pm
 t/lib/WithMethod.pm
+t/nesting.t
 t/recipes/basics/001_point.t
 t/recipes/basics/002_bank_account.t
 t/recipes/basics/006_augment_inner.t
