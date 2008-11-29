@@ -8,7 +8,7 @@ use Moose::Meta::Class;
 use B::Hooks::EndOfScope;
 use MooseX::Method::Signatures;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 our ($Declarator, $Offset, %Outer_Stack, @Roles);
 
@@ -221,7 +221,6 @@ sub class_parser {
     my ($package, $anon);
 
     if (defined $name) {
-        use Data::Dump qw/dump/;
         $package = $name;
         my $outer_stack = $Outer_Stack{ (caller(1))[1] };
         $package = join('::', $outer_stack->[-1], $package) if $outer_stack && @{ $outer_stack };
