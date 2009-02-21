@@ -19,9 +19,13 @@ t/lib/Affe.pm
 t/lib/Foo.pm
 t/lib/Tiger.pm
 t/lib/WithMethod.pm
+t/lib/WithNewline.pm
 t/nesting.t
+t/optional_positional.t
+t/override_attribute_from_role.t
 t/recipes/basics/001_point.t
 t/recipes/basics/002_bank_account.t
 t/recipes/basics/006_augment_inner.t
+t/with_newlines.t
 TODO
 xt/author/pod.t

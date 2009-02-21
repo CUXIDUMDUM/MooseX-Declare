@@ -8,7 +8,7 @@ use Moose::Meta::Class;
 use B::Hooks::EndOfScope;
 use MooseX::Method::Signatures;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 our ($Declarator, $Offset, %Outer_Stack, @Roles);
 
@@ -115,6 +115,7 @@ sub strip_options {
         Devel::Declare::set_linestr($linestr);
 
         skipspace;
+        $linestr = Devel::Declare::get_linestr();
     }
 
     return { map {
