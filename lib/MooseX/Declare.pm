@@ -7,8 +7,9 @@ use Devel::Declare ();
 use Moose::Meta::Class;
 use B::Hooks::EndOfScope;
 use MooseX::Method::Signatures;
+use Moose::Util qw/find_meta/;;
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 our ($Declarator, $Offset, %Outer_Stack, @Roles);
 
@@ -17,6 +18,9 @@ sub import {
     $type ||= '';
 
     my $caller = caller();
+
+    strict->import;
+    warnings->import;
 
     my @blocks       = qw/class role/;
     my @modifiers    = qw/before after around override augment/;
@@ -204,10 +208,10 @@ sub modifier_parser {
 
     inject_if_block( scope_injector_call('};'), "{ method (${proto})" );
 
-    my $meth = Moose->can($Declarator);
+    my $modifier_name = $Declarator;
     shadow(sub (&) {
         my $class = caller();
-        $meth->($class, $name, shift->()->body);
+        Moose::Util::add_method_modifier($class, $modifier_name, [$name => shift->()->body]);
     });
 }
 
@@ -258,7 +262,7 @@ sub class_parser {
     my $create_class = sub {
         local @Roles = ();
         shift->();
-        Moose->can('with')->($package, @Roles)
+        Moose::Util::apply_all_roles(find_meta($package), @Roles)
             if @Roles;
     };
 
