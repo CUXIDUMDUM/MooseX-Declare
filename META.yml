@@ -20,8 +20,8 @@ requires:
   B::Hooks::EndOfScope: 0
   Devel::Declare: 0.003000
   Moose: 0
-  MooseX::Method::Signatures: 0.09
+  MooseX::Method::Signatures: 0.10
   namespace::clean: 0
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.06
+version: 0.07

@@ -9,7 +9,7 @@ use B::Hooks::EndOfScope;
 use MooseX::Method::Signatures;
 use Moose::Util qw/find_meta/;;
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 our ($Declarator, $Offset, %Outer_Stack, @Roles);
 
@@ -206,12 +206,19 @@ sub modifier_parser {
     $proto = '$orig: $self' . (length $proto ? ", ${proto}" : '')
         if $Declarator eq 'around';
 
-    inject_if_block( scope_injector_call('};'), "{ method (${proto})" );
+    my $method = MooseX::Method::Signatures::Meta::Method->wrap(
+        signature    => qq{(${proto})},
+        package_name => Devel::Declare::get_curstash_name,
+        name         => $name,
+    );
+
+    inject_if_block( scope_injector_call() . $method->injectable_code );
 
     my $modifier_name = $Declarator;
     shadow(sub (&) {
         my $class = caller();
-        Moose::Util::add_method_modifier($class, $modifier_name, [$name => shift->()->body]);
+        $method->_set_actual_body(shift);
+        Moose::Util::add_method_modifier($class, $modifier_name, [$name => $method->body]);
     });
 }
 
@@ -421,9 +428,23 @@ L<namespace::clean>
 
 Florian Ragwitz E<lt>rafl@debian.orgE<gt>
 
+With contributions from:
+
+=over 4
+
+=item Ash Berlin E<lt>ash@cpan.orgE<gt>
+
+=item Piers Cawley E<lt>pdcawley@bofh.org.ukE<gt>
+
+=item Tomas Doran E<lt>bobtfish@bobtfish.netE<gt>
+
+=item Yanick Champoux E<lt>yanick@babyl.dyndns.orgE<gt>
+
+=back
+
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2008  Florian Ragwitz
+Copyright (c) 2008, 2009  Florian Ragwitz
 
 Licensed under the same terms as perl itself.
 
