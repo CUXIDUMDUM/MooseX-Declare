@@ -16,6 +16,7 @@ README
 t/anon.t
 t/attribute_issues.t
 t/basic.t
+t/clean.t
 t/import.t
 t/lib/Affe.pm
 t/lib/Foo.pm
