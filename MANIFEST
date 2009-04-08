@@ -8,6 +8,7 @@ inc/Module/Install/Metadata.pm
 inc/Module/Install/Win32.pm
 inc/Module/Install/WriteAll.pm
 lib/MooseX/Declare.pm
+lib/MooseX/Declare/Context.pm
 Makefile.PL
 MANIFEST			This list of files
 MANIFEST.SKIP
@@ -23,6 +24,7 @@ t/lib/Foo.pm
 t/lib/Tiger.pm
 t/lib/WithMethod.pm
 t/lib/WithNewline.pm
+t/modifiers.t
 t/nesting.t
 t/optional_positional.t
 t/override_attribute_from_role.t

@@ -3,15 +3,17 @@ use warnings;
 
 package MooseX::Declare;
 
+use Carp qw/croak/;
 use Devel::Declare ();
+use MooseX::Declare::Context;
 use Moose::Meta::Class;
 use B::Hooks::EndOfScope;
 use MooseX::Method::Signatures;
-use Moose::Util qw/find_meta/;;
+use Moose::Util qw/find_meta/;
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
-our ($Declarator, $Offset, %Outer_Stack, @Roles);
+our (%Outer_Stack, @Roles);
 
 sub import {
     my ($class, $type, %args) = @_;
@@ -50,133 +52,24 @@ sub import {
 
     {
         no strict 'refs';
-        *{ "${caller}::${_}" } = sub (&) { }
+        *{ "${caller}::${_}" } = __PACKAGE__->can($_) || sub { }
             for @exported;
 
         if ($type eq 'inner') {
             *{ "${caller}::with"  } = sub { push @Roles, @_; };
-            *{ "${caller}::clean" } = sub {};
+            *{ "${caller}::clean"  } = sub { };
         }
     }
 
     MooseX::Method::Signatures->setup_for($caller)
 }
 
-sub skip_declarator {
-    $Offset += Devel::Declare::toke_move_past_token($Offset);
+# The non-parsed version. 'my $meta = class()';
+sub class {
+    Moose::Meta::Class->create_anon_class;
 }
-
-sub skipspace {
-    $Offset += Devel::Declare::toke_skipspace($Offset);
-}
-
-sub strip_name {
-    skipspace;
-
-    if (my $len = Devel::Declare::toke_scan_word($Offset, 1)) {
-        my $linestr = Devel::Declare::get_linestr();
-        my $name    = substr($linestr, $Offset, $len);
-        substr($linestr, $Offset, $len) = '';
-        Devel::Declare::set_linestr($linestr);
-        return $name;
-    }
-
-    skipspace;
-
-    return;
-}
-
-sub strip_options {
-    skipspace;
-
-    my %ret;
-    my $linestr = Devel::Declare::get_linestr();
-
-    while (substr($linestr, $Offset, 1) ne '{') {
-        my $len = Devel::Declare::toke_scan_word($Offset, 0);
-        if (!$len) {
-            die 'expected option name';
-        }
-
-        $linestr = Devel::Declare::get_linestr();
-        my $key = substr($linestr, $Offset, $len);
-        substr($linestr, $Offset, $len) = '';
-
-        if ($key !~ /^(extends|with|is)$/) {
-            die "unknown option name '${key}'";
-        }
-
-        Devel::Declare::set_linestr($linestr);
-
-        skipspace;
-
-        $len = Devel::Declare::toke_scan_word($Offset, 1);
-        if (!$len) {
-            die 'expected option value';
-        }
-
-        $linestr = Devel::Declare::get_linestr();
-        my $val = substr($linestr, $Offset, $len);
-        substr($linestr, $Offset, $len) = '';
-
-        $ret{$key} ||= [];
-        push @{ $ret{$key} }, $val;
-
-        Devel::Declare::set_linestr($linestr);
-
-        skipspace;
-        $linestr = Devel::Declare::get_linestr();
-    }
-
-    return { map {
-        my $key = $_;
-        $key eq 'is'
-            ? ($key => { map { ($_ => 1) } @{ $ret{$key} } })
-            : ($key => $ret{$key})
-    } keys %ret };
-}
-
-sub strip_proto {
-    skipspace;
-
-    my $linestr = Devel::Declare::get_linestr();
-    if (substr($linestr, $Offset, 1) eq '(') {
-        my $length = Devel::Declare::toke_scan_str($Offset);
-        my $proto  = Devel::Declare::get_lex_stuff();
-        Devel::Declare::clear_lex_stuff();
-        $linestr = Devel::Declare::get_linestr();
-        substr($linestr, $Offset, $length) = '';
-        Devel::Declare::set_linestr($linestr);
-        return $proto;
-    }
-
-    return;
-}
-
-sub inject_if_block {
-    my $inject = shift;
-    my $inject_before = shift || '';
-
-    skipspace;
-
-    my $linestr = Devel::Declare::get_linestr;
-    if (substr($linestr, $Offset, 1) eq '{') {
-        substr($linestr, $Offset+1, 0) = $inject;
-        substr($linestr, $Offset, 0) = $inject_before;
-        Devel::Declare::set_linestr($linestr);
-    }
-}
-
-sub scope_injector_call {
-    my ($inject) = @_;
-    $inject ||= '';
-
-    return "BEGIN { MooseX::Declare::inject_scope('${inject}') }; ";
-}
-
-sub shadow {
-    my $pack = Devel::Declare::get_curstash_name;
-    Devel::Declare::shadow_sub("${pack}::${Declarator}", $_[0]);
+sub role {
+    Moose::Meta::Role->create_anon_role;
 }
 
 sub options_unwrap {
@@ -185,13 +78,13 @@ sub options_unwrap {
 
     if (my $superclasses = $options->{extends}) {
         $ret .= 'extends ';
-        $ret .= join q{,}, map { qq{'${_}'} } @{ $superclasses };
+        $ret .= join q{,}, map { "'$_'" } @{ $superclasses };
         $ret .= ';';
     }
 
     if (my $roles = $options->{with}) {
         $ret .= 'with ';
-        $ret .= join q{,}, map { qq{'${_}'} } @{ $roles };
+        $ret .= join q{,}, map { "'$_'" } @{ $roles };
         $ret .= ';';
     }
 
@@ -199,29 +92,29 @@ sub options_unwrap {
 }
 
 sub modifier_parser {
-    local ($Declarator, $Offset) = @_;
+    my $ctx = MooseX::Declare::Context->new->init(@_);
 
-    skip_declarator;
+    $ctx->skip_declarator;
+    local $Carp::Internal{'Devel::Declare'} = 1;
 
-    my $name = strip_name;
-    die 'method name expected'
-        unless defined $name;
+    my $name = $ctx->strip_name;
+    return unless defined $name;
 
-    my $proto = strip_proto || '';
+    my $proto = $ctx->strip_proto || '';
 
     $proto = '$orig: $self' . (length $proto ? ", ${proto}" : '')
-        if $Declarator eq 'around';
+        if $ctx->declarator eq 'around';
 
     my $method = MooseX::Method::Signatures::Meta::Method->wrap(
         signature    => qq{(${proto})},
-        package_name => Devel::Declare::get_curstash_name,
+        package_name => $ctx->get_curstash_name,
         name         => $name,
     );
 
-    inject_if_block( scope_injector_call() . $method->injectable_code );
+    $ctx->inject_if_block( $ctx->scope_injector_call() . $method->injectable_code );
 
-    my $modifier_name = $Declarator;
-    shadow(sub (&) {
+    my $modifier_name = $ctx->declarator;
+    $ctx->shadow(sub (&) {
         my $class = caller();
         $method->_set_actual_body(shift);
         Moose::Util::add_method_modifier($class, $modifier_name, [$name => $method->body]);
@@ -229,22 +122,21 @@ sub modifier_parser {
 }
 
 sub clean_parser {
-    local ($Declarator, $Offset) = @_;
+    my $ctx = MooseX::Declare::Context->new->init(@_);
 
-    skip_declarator;
+    $ctx->skip_declarator;
 
-    my $linestr = Devel::Declare::get_linestr();
-    substr($linestr, $Offset, 0) = q{;use namespace::clean -except => 'meta'};
-    Devel::Declare::set_linestr($linestr);
+    my $linestr = $ctx->get_linestr();
+    substr($linestr, $ctx->offset, 0) = q{;use namespace::clean -except => 'meta'};
+    $ctx->set_linestr($linestr);
 }
 
 sub class_parser {
-    local ($Declarator, $Offset) = @_;
+    my $ctx = MooseX::Declare::Context->new->init(@_);
 
-    skip_declarator;
+    $ctx->skip_declarator;
 
-    my $name    = strip_name;
-    my $options = strip_options;
+    my ($name, $options) = $ctx->strip_name_and_options;
 
     my ($package, $anon);
 
@@ -252,6 +144,10 @@ sub class_parser {
         $package = $name;
         my $outer_stack = $Outer_Stack{ (caller(1))[1] };
         $package = join('::', $outer_stack->[-1], $package) if $outer_stack && @{ $outer_stack };
+    }
+    elsif (keys %$options == 0 && substr($ctx->get_linestr, $ctx->offset, 1) ne '{') {
+        # No name, no options, no block. Probably { class => 'foo' }
+        return;
     }
     else {
         $anon = Moose::Meta::Class->create_anon_class;
@@ -261,12 +157,12 @@ sub class_parser {
     my $inject = qq/package ${package}; use MooseX::Declare 'inner', outer_package => '${package}', file => __FILE__; /;
     my $inject_after = '';
 
-    if ($Declarator eq 'class') {
+    if ($ctx->declarator eq 'class') {
         $inject       .= q/use Moose qw{extends has inner super confess blessed};/;
         $inject_after .= "${package}->meta->make_immutable;"
             unless exists $options->{is}->{mutable};
     }
-    elsif ($Declarator eq 'role') {
+    elsif ($ctx->declarator eq 'role') {
         $inject .= q/use Moose::Role qw{requires excludes has extends super inner confess blessed};/;
     }
     else { die }
@@ -277,10 +173,18 @@ sub class_parser {
     $inject_after .= 'BEGIN { my $file = __FILE__; my $outer = $MooseX::Declare::Outer_Stack{$file}; pop @{ $outer } if $outer && @{ $outer } }';
 
     if (defined $name) {
-        $inject .= scope_injector_call($inject_after);
+        $inject .= $ctx->scope_injector_call($inject_after);
     }
 
-    inject_if_block($inject);
+    unless ($ctx->inject_if_block($inject)) {
+      # No block, so probably "class Foo;" type thing.
+      my $linestr = $ctx->get_linestr;
+      croak "block or semi-colon expected after " . $ctx->declarator . " statement"
+        unless substr($linestr, $ctx->offset, 1) eq ';';
+
+      substr($linestr, $ctx->offset, 0, "{ $inject }");
+      $ctx->set_linestr($linestr);
+    }
 
     my $create_class = sub {
         local @Roles = ();
@@ -290,23 +194,11 @@ sub class_parser {
     };
 
     if (defined $name) {
-        shadow(sub (&) { $create_class->(@_); return $name; });
+        $ctx->shadow(sub (&) { $create_class->(@_); return $name; });
     }
     else {
-        shadow(sub (&) { $create_class->(@_); return $anon; });
+        $ctx->shadow(sub (&) { $create_class->(@_); return $anon; });
     }
-}
-
-sub inject_scope {
-    my ($inject) = @_;
-
-    on_scope_end {
-        my $linestr = Devel::Declare::get_linestr();
-        return unless defined $linestr;
-        my $offset  = Devel::Declare::get_linestr_offset();
-        substr($linestr, $offset, 0) = ';' . $inject;
-        Devel::Declare::set_linestr($linestr);
-    };
 }
 
 1;
@@ -363,9 +255,12 @@ for Perl 5. When used, it sets up the C<class> and C<role> keywords.
 
 Declares a new class. The class can be either named or anonymous, depending on
 whether or not a classname is given. Within the class definition Moose and
-MooseX::Method::Signatures are set up automatically in addition to the other
+L<MooseX::Method::Signatures> are set up automatically in addition to the other
 keywords described in this document. At the end of the definition the class
 will be made immutable. namespace::clean is injected to clean up Moose for you.
+
+Because of the way the options are parsed, you cannot have a class named "is",
+"with" or "extends".
 
 It's possible to specify options for classes:
 
@@ -388,6 +283,10 @@ Applies a role to the class being declared.
     class Foo is mutable { ... }
 
 Causes the class not to be made immutable after its definition.
+
+Options can also be provided for anonymous classes using the same syntax:
+
+    my $meta_class = class with Role;
 
 =back
 

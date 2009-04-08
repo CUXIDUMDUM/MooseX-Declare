@@ -5,8 +5,10 @@ author:
 build_requires:
   Test::Exception: 0
   Test::NoWarnings: 0
+configure_requires:
+  ExtUtils::MakeMaker: 6.50
 distribution_type: module
-generated_by: 'Module::Install version 0.79'
+generated_by: 'Module::Install version 0.81'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -18,10 +20,10 @@ no_index:
     - t
 requires:
   B::Hooks::EndOfScope: 0
-  Devel::Declare: 0.003000
+  Devel::Declare: 0.003005
   Moose: 0
   MooseX::Method::Signatures: 0.10
   namespace::clean: 0
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.09
+version: 0.10

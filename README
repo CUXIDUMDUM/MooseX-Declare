@@ -49,6 +49,9 @@ KEYWORDS
     of the definition the class will be made immutable. namespace::clean is
     injected to clean up Moose for you.
 
+    Because of the way the options are parsed, you cannot have a class named
+    "is", "with" or "extends".
+
     It's possible to specify options for classes:
 
     extends
@@ -65,6 +68,11 @@ KEYWORDS
             class Foo is mutable { ... }
 
         Causes the class not to be made immutable after its definition.
+
+        Options can also be provided for anonymous classes using the same
+        syntax:
+
+            my $meta_class = class with Role;
 
   role
         role Foo { ... }
