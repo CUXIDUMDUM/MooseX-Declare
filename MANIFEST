@@ -9,6 +9,20 @@ inc/Module/Install/Win32.pm
 inc/Module/Install/WriteAll.pm
 lib/MooseX/Declare.pm
 lib/MooseX/Declare/Context.pm
+lib/MooseX/Declare/Syntax/EmptyBlockIfMissing.pm
+lib/MooseX/Declare/Syntax/Extending.pm
+lib/MooseX/Declare/Syntax/InnerSyntaxHandling.pm
+lib/MooseX/Declare/Syntax/Keyword/Class.pm
+lib/MooseX/Declare/Syntax/Keyword/Clean.pm
+lib/MooseX/Declare/Syntax/Keyword/MethodModifier.pm
+lib/MooseX/Declare/Syntax/Keyword/Role.pm
+lib/MooseX/Declare/Syntax/KeywordHandling.pm
+lib/MooseX/Declare/Syntax/MethodDeclaration.pm
+lib/MooseX/Declare/Syntax/MooseSetup.pm
+lib/MooseX/Declare/Syntax/NamespaceHandling.pm
+lib/MooseX/Declare/Syntax/OptionHandling.pm
+lib/MooseX/Declare/Syntax/RoleApplication.pm
+lib/MooseX/Declare/Util.pm
 Makefile.PL
 MANIFEST			This list of files
 MANIFEST.SKIP

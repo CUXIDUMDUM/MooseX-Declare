@@ -3,12 +3,13 @@ abstract: 'Declarative syntax for Moose'
 author:
   - 'Florian Ragwitz <rafl@debian.org>'
 build_requires:
+  ExtUtils::MakeMaker: 6.42
   Test::Exception: 0
   Test::NoWarnings: 0
 configure_requires:
-  ExtUtils::MakeMaker: 6.50
+  ExtUtils::MakeMaker: 6.42
 distribution_type: module
-generated_by: 'Module::Install version 0.81'
+generated_by: 'Module::Install version 0.85'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -22,8 +23,8 @@ requires:
   B::Hooks::EndOfScope: 0
   Devel::Declare: 0.003005
   Moose: 0
-  MooseX::Method::Signatures: 0.10
+  MooseX::Method::Signatures: 0.16
   namespace::clean: 0
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.10
+version: 0.20

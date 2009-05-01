@@ -80,7 +80,7 @@ KEYWORDS
         my $anon_role = role { ... };
 
     Declares a new role. The role can be either named or anonymous,
-    depending on wheter or not a name is given. Within the role definition
+    depending on whether or not a name is given. Within the role definition
     Moose::Role and MooseX::Method::Signatures are set up automatically in
     addition to the other keywords described in this document. Again,
     namespace::clean is injected to clean up Moose::Role and for you.
@@ -166,6 +166,8 @@ SEE ALSO
 
     namespace::clean
 
+    vim syntax: <http://www.vim.org/scripts/script.php?script_id=2526>
+
 AUTHOR
     Florian Ragwitz <rafl@debian.org>
 
@@ -173,6 +175,7 @@ AUTHOR
 
     Ash Berlin <ash@cpan.org>
     Hans Dieter Pearcey <hdp@cpan.org>
+    Matt Kraai <kraai@ftbfs.org>
     Nelo Onyiah <nelo.onyiah@gmail.com>
     Piers Cawley <pdcawley@bofh.org.uk>
     Tomas Doran <bobtfish@bobtfish.net>
