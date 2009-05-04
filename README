@@ -46,8 +46,8 @@ KEYWORDS
     depending on whether or not a classname is given. Within the class
     definition Moose and MooseX::Method::Signatures are set up automatically
     in addition to the other keywords described in this document. At the end
-    of the definition the class will be made immutable. namespace::clean is
-    injected to clean up Moose for you.
+    of the definition the class will be made immutable. namespace::autoclean
+    is injected to clean up Moose and other imports for you.
 
     Because of the way the options are parsed, you cannot have a class named
     "is", "with" or "extends".
@@ -83,7 +83,8 @@ KEYWORDS
     depending on whether or not a name is given. Within the role definition
     Moose::Role and MooseX::Method::Signatures are set up automatically in
     addition to the other keywords described in this document. Again,
-    namespace::clean is injected to clean up Moose::Role and for you.
+    namespace::autoclean is injected to clean up Moose::Role and other
+    imports for you.
 
     It's possible to specify options for roles:
 
@@ -107,6 +108,29 @@ KEYWORDS
     automatically set up as the invocant for the method.
 
   clean
+    Sometimes you don't want the automatic cleaning the "class" and "role"
+    keywords provide using namespace::autoclean. In those cases you can
+    specify the "dirty" trait for your class or role:
+
+        use MooseX::Declare;
+        class Foo is dirty { ... }
+
+    This will prevent cleaning of your namespace, except for the keywords
+    imported from "Moose" or "Moose::Role". Additionally, a "clean" keyword
+    is provided, which allows you to explicitly clean all functions that
+    were defined prior to calling "clean". Here's an example:
+
+        use MooseX::Declare;
+        class Foo is dirty {
+            sub helper_function { ... }
+            clean;
+            method foo ($stuff) { ...; return helper_function($stuff); }
+        }
+
+    With that, the helper function won't be available as a method to a user
+    of your class, but you're still able to use it inside your class.
+
+NOTE ON IMPORTS
     When creating a class with MooseX::Declare like:
 
         use MooseX::Declare;
@@ -117,10 +141,9 @@ KEYWORDS
         {
             package Foo;
             use Moose;
-            use namespace::clean -except => 'meta';
+            use namespace::autoclean;
             ...
-            __PACKAGE__->meta->mate_immutable();
-            1;
+            __PACKAGE__->meta->make_immutable;
         }
 
     So if you declare imports outside the class, the symbols get imported
@@ -134,19 +157,13 @@ KEYWORDS
             method pp($value)   { $self->dump($value) } # an alias for our dump method
         }
 
-    Furthermore, any imports will not be cleaned up by namespace::clean
-    after compilation since the class knows nothing about them! The
-    temptation to do this may stem from wanting to keep all your import
-    declarations in the same place.
-
-    The solution is two-fold. First, only import MooseX::Declare outside the
-    class definition (because you have to). Make all other imports inside
-    the class definition and clean up with the "clean" keyword:
+    To solve this, only import MooseX::Declare outside the class definition
+    (because you have to). Make all other imports inside the class
+    definition.
 
         use MooseX::Declare;
         class Foo {
             use Data::Dump qw/dump/;
-            clean;
             method dump($value) { return dump($value) } # Data::Dump::dump IS in Foo::
             method pp($value)   { $self->dump($value) } # an alias for our dump method
         }
@@ -155,7 +172,11 @@ KEYWORDS
         Foo->new->pp($some_value);
 
     NOTE that the import "Data::Dump::dump()" and the method "Foo::dump()",
-    although having the same name, do not conflict with each other.
+    although having the same name, do not conflict with each other, because
+    the imported "dump" function will be cleaned during compile time, so
+    only the method remains there at run time. If you want to do more
+    esoteric things with imports, have a look at the "clean" keyword and the
+    "dirty" trait.
 
 SEE ALSO
     Moose
@@ -164,9 +185,11 @@ SEE ALSO
 
     MooseX::Method::Signatures
 
-    namespace::clean
+    namespace::autoclean
 
     vim syntax: <http://www.vim.org/scripts/script.php?script_id=2526>
+
+    emacs syntax: <http://github.com/jrockway/cperl-mode>
 
 AUTHOR
     Florian Ragwitz <rafl@debian.org>
@@ -178,6 +201,7 @@ AUTHOR
     Matt Kraai <kraai@ftbfs.org>
     Nelo Onyiah <nelo.onyiah@gmail.com>
     Piers Cawley <pdcawley@bofh.org.uk>
+    Stevan Little <stevan.little@iinteractive.com>
     Tomas Doran <bobtfish@bobtfish.net>
     Yanick Champoux <yanick@babyl.dyndns.org>
 
