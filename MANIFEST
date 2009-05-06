@@ -45,6 +45,7 @@ t/lib/Tiger.pm
 t/lib/WithMethod.pm
 t/lib/WithNewline.pm
 t/modifiers.t
+t/nested_anonymous_classes.t
 t/nesting.t
 t/optional_positional.t
 t/override_attribute_from_role.t

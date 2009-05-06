@@ -21,11 +21,11 @@ no_index:
     - t
 requires:
   B::Hooks::EndOfScope: 0
-  Devel::Declare: 0.003005
+  Devel::Declare: 0.005001
   Moose: 0
   MooseX::Method::Signatures: 0.16
   namespace::autoclean: 0.05
   namespace::clean: 0
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.21
+version: 0.22
