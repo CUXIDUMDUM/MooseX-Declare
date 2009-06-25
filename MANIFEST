@@ -44,6 +44,7 @@ t/lib/Foo.pm
 t/lib/Tiger.pm
 t/lib/WithMethod.pm
 t/lib/WithNewline.pm
+t/meta_should_be_signature.t
 t/modifiers.t
 t/nested_anonymous_classes.t
 t/nesting.t
