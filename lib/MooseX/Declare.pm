@@ -3,12 +3,13 @@ use warnings;
 
 package MooseX::Declare;
 
-use aliased 'MooseX::Declare::Syntax::Keyword::Class', 'ClassKeyword';
-use aliased 'MooseX::Declare::Syntax::Keyword::Role',  'RoleKeyword';
+use aliased 'MooseX::Declare::Syntax::Keyword::Class',      'ClassKeyword';
+use aliased 'MooseX::Declare::Syntax::Keyword::Role',       'RoleKeyword';
+use aliased 'MooseX::Declare::Syntax::Keyword::Namespace',  'NamespaceKeyword';
 
 use namespace::clean;
 
-our $VERSION = '0.23';
+our $VERSION = '0.27';
 
 sub import {
     my ($class, %args) = @_;
@@ -26,6 +27,7 @@ sub import {
 sub keywords {
     ClassKeyword->new(identifier => 'class'),
     RoleKeyword->new(identifier => 'role'),
+    NamespaceKeyword->new(identifier => 'namespace'),
 }
 
 1;
@@ -102,9 +104,11 @@ Sets a superclass for the class being declared.
 
 =item with
 
-    class Foo with Role { ... }
+    class Foo with Role             { ... }
+    class Foo with Role1 with Role2 { ... }
+    class Foo with (Role1, Role2)   { ... }
 
-Applies a role to the class being declared.
+Applies a role or roles to the class being declared.
 
 =item is mutable
 
@@ -251,6 +255,12 @@ With contributions from:
 =over 4
 
 =item Ash Berlin E<lt>ash@cpan.orgE<gt>
+
+=item Chas. J. Owens IV E<lt>chas.owens@gmail.comE<gt>
+
+=item Dave Rolsky E<lt>autarch@urth.orgE<gt>
+
+=item Devin Austin E<lt>dhoss@cpan.orgE<gt>
 
 =item Hans Dieter Pearcey E<lt>hdp@cpan.orgE<gt>
 

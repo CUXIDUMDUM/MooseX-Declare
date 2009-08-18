@@ -7,11 +7,10 @@ use Sub::Install qw( install_sub );
 
 use aliased 'MooseX::Declare::Syntax::Keyword::MethodModifier';
 use aliased 'MooseX::Declare::Syntax::Keyword::Method';
+use aliased 'MooseX::Declare::Syntax::Keyword::With', 'WithKeyword';
 use aliased 'MooseX::Declare::Syntax::Keyword::Clean', 'CleanKeyword';
 
 use namespace::clean -except => 'meta';
-
-our @Roles;
 
 with qw(
     MooseX::Declare::Syntax::NamespaceHandling
@@ -26,13 +25,15 @@ sub import_symbols_from { 'Moose' }
 
 around default_inner => sub {
     return [
-        Method->new(
-            identifier          => 'method',
-        ),
+        WithKeyword->new(identifier => 'with'),
+        Method->new(identifier => 'method'),
         MethodModifier->new(
-            identifier          => 'around',
-            modifier_type       => 'around',
-            prototype_beginning => '$orig: $self',
+            identifier           => 'around',
+            modifier_type        => 'around',
+            prototype_injections => {
+                declarator => 'around',
+                injections => [ 'CodeRef $orig' ],
+            },
         ),
         map { MethodModifier->new(identifier => $_, modifier_type => $_) }
             qw( after before override augment ),
@@ -50,7 +51,7 @@ after add_namespace_customizations => sub {
 
     # add Moose initializations to preamble
     $ctx->add_preamble_code_parts(
-        sprintf 'use %s qw( %s )', $self->import_symbols_from, join ' ', $self->imported_moose_symbols,
+        sprintf 'use %s qw( %s )', $self->import_symbols_from($ctx), join ' ', $self->imported_moose_symbols($ctx),
     );
 
     # make class immutable unless specified otherwise
@@ -62,27 +63,7 @@ after add_namespace_customizations => sub {
 
 after handle_post_parsing => sub {
     my ($self, $ctx, $package, $class) = @_;
-
-    # finish off by apply the roles
-    my $create_class = sub {
-        local @Roles = ();
-        shift->();
-        Moose::Util::apply_all_roles(find_meta($package), @Roles)
-            if @Roles;
-    };
-
-    $ctx->shadow(sub (&) { $create_class->(@_); return $class; });
-};
-
-after setup_inner_for => sub {
-    my ($self, $setup_class) = @_;
-
-    # install role collector
-    install_sub({
-        code    => sub { push @Roles, @_ },
-        into    => $setup_class,
-        as      => 'with',
-    });
+    $ctx->shadow(sub (&) { shift->(); return $class; });
 };
 
 1;

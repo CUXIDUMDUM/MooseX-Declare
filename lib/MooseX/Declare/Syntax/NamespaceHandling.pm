@@ -1,11 +1,13 @@
 package MooseX::Declare::Syntax::NamespaceHandling;
 
 use Moose::Role;
+use Moose::Util qw( does_role );
 use MooseX::Declare::Util qw( outer_stack_peek );
 use Carp;
 
 use aliased 'MooseX::Declare::Context::Namespaced';
 use aliased 'MooseX::Declare::Context::WithOptions';
+use aliased 'MooseX::Declare::Context::Parameterized';
 use aliased 'MooseX::Declare::StackItem';
 
 use namespace::clean -except => 'meta';
@@ -58,10 +60,11 @@ sub generate_current_stack_item {
     my ($self, $ctx) = @_;
 
     return StackItem->new(
-        identifier    => $self->identifier,
-        is_dirty      => $ctx->options->{is}{dirty},
-        handler       => ref($self),
-        namespace     => $ctx->namespace,
+        identifier       => $self->identifier,
+        is_dirty         => $ctx->options->{is}{dirty},
+        is_parameterized => does_role($ctx, Parameterized) && $ctx->has_parameter_signature,
+        handler          => ref($self),
+        namespace        => $ctx->namespace,
     );
 }
 
@@ -135,8 +138,7 @@ sub parse {
 
     # actual code injection
     $ctx->inject_code_parts(
-        inject_cleanup_code_parts => defined($name),
-        missing_block_handler     => sub { $self->handle_missing_block(@_) },
+        missing_block_handler => sub { $self->handle_missing_block(@_) },
     );
 
     # a last chance to change things
