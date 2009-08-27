@@ -23,15 +23,15 @@ no_index:
 requires:
   Devel::Declare: 0.005011
   List::MoreUtils: 0
-  Moose: 0.82
+  Moose: 0.89
   MooseX::AttributeHelpers: 0
-  MooseX::Method::Signatures: 0.21
+  MooseX::Method::Signatures: 0.23
   MooseX::Role::Parameterized: 0.12
   MooseX::Types::Moose: 0
   namespace::autoclean: 0.05
-  namespace::clean: 0
+  namespace::clean: 0.11
 resources:
   bugtracker: http://rt.cpan.org/Public/Dist/Display.html?Name=MooseX-Declare
   license: http://dev.perl.org/licenses/
   repository: git://github.com/rafl/moosex-declare.git
-version: 0.27
+version: 0.28
