@@ -34,4 +34,4 @@ resources:
   bugtracker: http://rt.cpan.org/Public/Dist/Display.html?Name=MooseX-Declare
   license: http://dev.perl.org/licenses/
   repository: git://github.com/rafl/moosex-declare.git
-version: 0.29
+version: 0.30

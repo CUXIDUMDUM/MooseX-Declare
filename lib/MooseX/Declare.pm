@@ -9,7 +9,7 @@ use aliased 'MooseX::Declare::Syntax::Keyword::Namespace',  'NamespaceKeyword';
 
 use namespace::clean;
 
-our $VERSION = '0.29';
+our $VERSION = '0.30';
 
 sub import {
     my ($class, %args) = @_;
@@ -271,6 +271,10 @@ With contributions from:
 =item nperez E<lt>nperez@cpan.orgE<gt>
 
 =item Piers Cawley E<lt>pdcawley@bofh.org.ukE<gt>
+
+=item Rafael Kitover E<lt>rkitover@io.comE<gt>
+
+=item Robert ’phaylon’ Sedlacek E<lt>rs@474.atE<gt>
 
 =item Stevan Little E<lt>stevan.little@iinteractive.comE<gt>
 
