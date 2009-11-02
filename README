@@ -193,6 +193,10 @@ SEE ALSO
 
     emacs syntax: <http://github.com/jrockway/cperl-mode>
 
+    Geany syntax + notes:
+    <http://www.cattlegrid.info/blog/2009/09/moosex-declare-geany-syntax.htm
+    l>
+
 AUTHOR
     Florian Ragwitz <rafl@debian.org>
 
@@ -200,10 +204,13 @@ AUTHOR
 
     Ash Berlin <ash@cpan.org>
     Chas. J. Owens IV <chas.owens@gmail.com>
+    Chris Prather <chris@prather.org>
     Dave Rolsky <autarch@urth.org>
     Devin Austin <dhoss@cpan.org>
     Hans Dieter Pearcey <hdp@cpan.org>
+    Justin Hunter <justin.d.hunter@gmail.com>
     Matt Kraai <kraai@ftbfs.org>
+    Michele Beltrame <arthas@cpan.org>
     Nelo Onyiah <nelo.onyiah@gmail.com>
     nperez <nperez@cpan.org>
     Piers Cawley <pdcawley@bofh.org.uk>

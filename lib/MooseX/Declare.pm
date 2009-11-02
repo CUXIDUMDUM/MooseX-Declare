@@ -9,7 +9,7 @@ use aliased 'MooseX::Declare::Syntax::Keyword::Namespace',  'NamespaceKeyword';
 
 use namespace::clean;
 
-our $VERSION = '0.31';
+our $VERSION = '0.32';
 
 sub import {
     my ($class, %args) = @_;
@@ -246,6 +246,8 @@ vim syntax: L<http://www.vim.org/scripts/script.php?script_id=2526>
 
 emacs syntax: L<http://github.com/jrockway/cperl-mode>
 
+Geany syntax + notes: L<http://www.cattlegrid.info/blog/2009/09/moosex-declare-geany-syntax.html>
+
 =head1 AUTHOR
 
 Florian Ragwitz E<lt>rafl@debian.orgE<gt>
@@ -258,13 +260,19 @@ With contributions from:
 
 =item Chas. J. Owens IV E<lt>chas.owens@gmail.comE<gt>
 
+=item Chris Prather E<lt>chris@prather.orgE<gt>
+
 =item Dave Rolsky E<lt>autarch@urth.orgE<gt>
 
 =item Devin Austin E<lt>dhoss@cpan.orgE<gt>
 
 =item Hans Dieter Pearcey E<lt>hdp@cpan.orgE<gt>
 
+=item Justin Hunter E<lt>justin.d.hunter@gmail.comE<gt>
+
 =item Matt Kraai E<lt>kraai@ftbfs.orgE<gt>
+
+=item Michele Beltrame E<lt>arthas@cpan.orgE<gt>
 
 =item Nelo Onyiah E<lt>nelo.onyiah@gmail.comE<gt>
 
